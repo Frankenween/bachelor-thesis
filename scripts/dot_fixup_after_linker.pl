@@ -17,7 +17,7 @@ $s =~ s/label = "\\"(.*)\\""/label = "$1"/g;
 my %id_mapping = ();
 while ($s =~ /([0-9]+) \[.*label = "(.*)".*\]/g) {
 	$id_mapping{"$1"} = $2;
-	print "$1 -> $2\n";
+#	print "$1 -> $2\n";
 }
 
 open $fh, '>', $out_file or die "Could not open '$out_file' for writing: $!\n";
