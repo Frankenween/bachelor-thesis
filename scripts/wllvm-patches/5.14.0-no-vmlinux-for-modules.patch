@@ -1,0 +1,17 @@
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index dff888720..4238b486b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1461,7 +1461,7 @@ endif
+ # using awk while concatenating to the final file.
+ 
+ PHONY += modules
+-modules: $(if $(KBUILD_BUILTIN),vmlinux) modules_check modules_prepare
++modules: modules_check modules_prepare
+ 
+ cmd_modules_order = $(AWK) '!x[$$0]++' $(real-prereqs) > $@
+ 
+
