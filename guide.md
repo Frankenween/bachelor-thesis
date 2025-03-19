@@ -7,7 +7,7 @@
      `LLVM_COMPILER_PATH=/path/to/clang-14/bin/`
     4. Check with `wllvm-sanity-checker`
 3. Build kernel with `CC=wllvm`
-    1. `wllvm-build-rpm.sh path/to/src.rpm /path/to/builddir`
+    1. `wllvm-build-rpm.sh path/to/src.rpm /path/to/builddir /path/to/kern/patches`
     - Note 1: the build will fail due to `.llvm_bc` section in object files.
     It is fine since we don't need linked vmlinux, built-in.a for all
     subsystems is enough.
