@@ -1,0 +1,18 @@
+ scripts/link-vmlinux.sh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
+index 36ef7b37f..78efbd57e 100755
+--- a/scripts/link-vmlinux.sh
++++ b/scripts/link-vmlinux.sh
+@@ -354,6 +354,9 @@ ${MAKE} -f "${srctree}/scripts/Makefile.build" obj=init need-builtin=1
+ modpost_link vmlinux.o
+ objtool_link vmlinux.o
+ 
++cp vmlinux.o vmlinux-with-bc.o
++${OBJCOPY} --remove-section=.llvm_bc vmlinux.o
++
+ # modpost vmlinux.o to check for section mismatches
+ ${MAKE} -f "${srctree}/scripts/Makefile.modpost" MODPOST_VMLINUX=1
+ 
+

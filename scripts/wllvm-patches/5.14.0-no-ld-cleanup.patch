@@ -1,0 +1,25 @@
+ scripts/link-vmlinux.sh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/scripts/link-vmlinux.sh b/scripts/link-vmlinux.sh
+index 36ef7b37f..904ca3d4d 100755
+--- a/scripts/link-vmlinux.sh
++++ b/scripts/link-vmlinux.sh
+@@ -315,11 +315,11 @@ cleanup()
+ 	rm -f .tmp_initcalls.lds
+ 	rm -f .tmp_symversions.lds
+ 	rm -f .tmp_vmlinux*
+-	rm -f System.map
+-	rm -f vmlinux
+-	rm -f vmlinux.map
+-	rm -f vmlinux.o
+-	rm -f .vmlinux.d
++	# rm -f System.map
++	# rm -f vmlinux
++	# rm -f vmlinux.map
++	# rm -f vmlinux.o
++	# rm -f .vmlinux.d
+ }
+ 
+ # Use "make V=1" to debug this script
+
