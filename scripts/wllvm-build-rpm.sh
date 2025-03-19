@@ -19,7 +19,7 @@ sed -i 's/%define make_target bzImage/%define make_target all/' "$SPEC_PATH"
 echo Building!
 
 WITH_OPTS=("toolchain_clang")
-WITHOUT_OPTS=("debug" "debuginfo" "bpftool" "perf" "kabichk" "tools" "header" "cross-headers" "doc" "ipaclones")
+WITHOUT_OPTS=("debug" "debuginfo" "bpftool" "perf" "kabichk" "tools" "headers" "cross-headers" "doc" "ipaclones")
 
 WITH_OPTS_STR="$(printf " --with %s" "${WITH_OPTS[@]}")"
 WITHOUT_OPTS_STR="$(printf " --without %s" "${WITHOUT_OPTS[@]}")"
