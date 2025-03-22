@@ -8,9 +8,7 @@
     4. Check with `wllvm-sanity-checker`
 3. Build kernel with `CC=wllvm`
     1. `wllvm-build-rpm.sh path/to/src.rpm /path/to/builddir /path/to/kern/patches`
-    - Note 1: the build will fail due to `.llvm_bc` section in object files.
-    It is fine since we don't need linked vmlinux, built-in.a for all
-    subsystems is enough.
+    - Note 1: `CONFIG_DEBUG_INFO_BTF` must be disabled!
     - Note 2: use make target `all` to compile both kernel and modules
 4. Run `collect_builtins.sh BUILD_DIR` in a directory, where you want to __store__
 the results. It will extract LLVM IR from `built-in.a` archives for subsystems
