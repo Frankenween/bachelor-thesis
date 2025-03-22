@@ -38,14 +38,22 @@ SPEC_PATH="$BUILDDIR/SPECS/kernel.spec"
 echo Unpacking archive
 rpm -ivh --define "_topdir ${BUILDDIR}" $SRC > /dev/null
 
-# Allpy patches
-ARCHIVE_NAME="$(src_archive_name)"
-repack_src_archive "$ARCHIVE_NAME" "$PATCHES"
+# Apply patches
+if [ ! -z "$PATCHES" ]; then
+  ARCHIVE_NAME="$(src_archive_name)"
+  repack_src_archive "$ARCHIVE_NAME" "$PATCHES"
+fi
 
 # Fixup spec file
 echo Fixing spec file
 sed -i 's/%global clang_make_opts HOSTCC=clang CC=clang/%global clang_make_opts HOSTCC=wllvm CC=wllvm/g' "$SPEC_PATH"
-sed -i 's/%define make_target bzImage/%define make_target all/' "$SPEC_PATH"
+sed -i 's/%define make_target bzImage/%define make_target all/g' "$SPEC_PATH"
+
+# Fix configs
+for config_file in $(find ${BUILDDIR}/SOURCES -name kernel-*.config); do
+  echo $config_file
+  sed -ri 's/(CONFIG_DEBUG_INFO.*)=y/# \1 is not set/g' $config_file
+done
 
 # Build it!
 echo Building!
