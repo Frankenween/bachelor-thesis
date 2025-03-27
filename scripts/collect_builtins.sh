@@ -12,6 +12,7 @@ for f in ${objects[@]}; do
 
 	pushd "$(dirname $f)"
 	extract-bc -b -o $RESULT_NAME $FNAME
+	# EXPORT llvm-14 disassembler!
 	llvm-dis -o $RESULT_NAME $RESULT_NAME
 	mv "$RESULT_NAME" "$CNT"
 	popd
