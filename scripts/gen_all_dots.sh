@@ -7,7 +7,7 @@ DST="$4"
 SVF_ARGS=("$@")
 for src in "$SRC"/*.ll; do
 	fname=$(basename -s .ll $src)
-	$WPA "${SVF_ARGS[@]:4}" -ind-call-limit 1000000000 -dump-callgraph "$src"
+	$WPA "${SVF_ARGS[@]:4}" -ind-call-limit 1000000000 -node-alloc-strat=dense -dump-callgraph "$src"
 	rm -f callgraph_initial.dot
 	$FIXUP callgraph_final.dot callgraph_final.dot
 	mv callgraph_final.dot "$DST/$fname.dot"
