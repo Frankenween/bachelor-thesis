@@ -20,13 +20,16 @@ def disasm_one_file(rela):
         output_file + ".ll", # Use the same file to avoid deletion
         os.path.join(build_root, rela),
     ], stderr=None, stdout=None)
-    subprocess.run([
+    got_ir = subprocess.run([
         "llvm-dis",
         "-o",
         output_file + ".ll",
         output_file + ".ll"
     ], stderr=None, stdout=None)
-    return output_file + ".ll"
+    if got_ir.returncode == 0:
+        return output_file + ".ll"
+    else:
+        return None
 
 def disasm_module_complete(rela):
     mod_path = rela[:-3] + ".mod"
@@ -51,13 +54,35 @@ def disasm_modules():
             disasm_module_complete(rela)
 
 def disasm_builtin(rela):
-    # TODO: do this recursively - bigger results help pointer analysis
-    # For now - get all object files and disasm them independently
     archive_data = subprocess.run([
         "ar", "-t", os.path.join(build_root, rela)
     ], capture_output=True)
-    builtin_path = os.path.dirname(rela)
     objs = list(archive_data.stdout.split())
+    if len(objs) == 0:
+        return
+    
+    # Try to build full built-in IR
+    result = disasm_one_file(rela)
+    if result is None:
+        print(f"No IR for {rela}")
+        return
+    ir_size = os.path.getsize(result)
+    if ir_size <= mem_limit:
+        print(f"builtin {rela} is small enough!")
+        return
+
+    cnt_path = os.path.dirname(rela)
+    os.remove(result)
+    subparts = list(
+        glob.glob(f"{os.path.join(build_root, cnt_path)}/*/built-in.a", recursive=False)
+    )
+    if len(subparts) > 1:
+        # built-in.a is a thin archive, so if we have only one built-in in subfolder - a pity
+        for nxt in subparts:
+            disasm_builtin(os.path.relpath(nxt, build_root))
+        return
+    # This is an ugly archive - get all object files and disasm them independently
+    builtin_path = os.path.dirname(rela)
     for obj in objs:
         real_name = obj.decode("utf-8")
         # ar -t returns paths relative to archive
@@ -92,5 +117,5 @@ if args.split:
         for path in split_list:
             should_split.add(path)
 
-# disasm_modules()
+disasm_modules()
 disasm_builtins()
