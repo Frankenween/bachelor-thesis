@@ -12,7 +12,6 @@ def disasm_one_file(rela):
     result_dir = os.path.join(args.output_dir, dir)
     os.makedirs(result_dir, exist_ok=True)
     output_file = os.path.join(result_dir, name)
-    # print(name, result_dir, output_file)
     subprocess.run([
         "extract-bc",
         "-b",
@@ -26,12 +25,14 @@ def disasm_one_file(rela):
         output_file + ".ll",
         output_file + ".ll"
     ], stderr=None, stdout=None)
+    
     if got_ir.returncode == 0:
         return output_file + ".ll"
     else:
         return None
 
 def disasm_module_complete(rela):
+    # Get objects files from module. They are stored in .mod
     mod_path = rela[:-3] + ".mod"
     with open(os.path.join(build_root, mod_path)) as obj_list:
         objs = list(obj_list.read().split())
@@ -53,40 +54,52 @@ def disasm_modules():
             print(f"Module {rela} is split: IR size is {ir_size / 1024 ** 2} Mb")
             disasm_module_complete(rela)
 
+# Return list of .o files that were processed
+# Rela paths are returned
 def disasm_builtin(rela):
     archive_data = subprocess.run([
         "ar", "-t", os.path.join(build_root, rela)
     ], capture_output=True)
-    objs = list(archive_data.stdout.split())
+
+    # Objs - rela paths
+    builtin_path = os.path.dirname(rela)
+    objs = set(map(
+        lambda bs: os.path.relpath(
+            os.path.join(builtin_path, bs.decode("utf-8")),
+            build_root),
+        archive_data.stdout.split())
+    )
     if len(objs) == 0:
-        return
+        return set()
     
     # Try to build full built-in IR
     result = disasm_one_file(rela)
     if result is None:
         print(f"No IR for {rela}")
-        return
+        return set()
     ir_size = os.path.getsize(result)
     if ir_size <= mem_limit:
-        print(f"builtin {rela} is small enough!")
-        return
+        print(f"built-in {rela} is small enough")
+        return objs
 
-    cnt_path = os.path.dirname(rela)
+    print(f"built-in {rela} is too big, processing")
     os.remove(result)
+    
+    orig_objs = objs
+    cnt_path = os.path.dirname(rela)
     subparts = list(
         glob.glob(f"{os.path.join(build_root, cnt_path)}/*/built-in.a", recursive=False)
     )
-    if len(subparts) > 1:
-        # built-in.a is a thin archive, so if we have only one built-in in subfolder - a pity
-        for nxt in subparts:
-            disasm_builtin(os.path.relpath(nxt, build_root))
-        return
+    
+    for nxt in subparts:
+        # Remove all processed objects
+        objs -= disasm_builtin(os.path.relpath(nxt, build_root))
+    
     # This is an ugly archive - get all object files and disasm them independently
-    builtin_path = os.path.dirname(rela)
     for obj in objs:
-        real_name = obj.decode("utf-8")
-        # ar -t returns paths relative to archive
-        disasm_one_file(os.path.join(builtin_path, real_name))
+        print(f"out-of-archive object for {rela}: {obj}")
+        disasm_one_file(obj)
+    return orig_objs
 
 def disasm_builtins():
     for builtin in glob.glob(f"{build_root}/*/built-in.a", recursive=False):
